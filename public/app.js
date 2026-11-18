@@ -24670,9 +24670,20 @@ var LinkForm = ({
 // src/client/components/LinkTable.tsx
 var import_react2 = __toESM(require_react());
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+var STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "expired", label: "Expired" }
+];
 var LinkTable = ({
   links,
   isLoading,
+  sort,
+  status,
+  search,
+  onSortChange,
+  onStatusChange,
+  onSearchChange,
   onRefresh
 }) => {
   const [copiedCode, setCopiedCode] = (0, import_react2.useState)(null);
@@ -24688,6 +24699,21 @@ var LinkTable = ({
     } catch {
     }
   };
+  const handleToggleClicksSort = () => {
+    if (sort === "clicks_desc") {
+      onSortChange("clicks_asc");
+    } else {
+      onSortChange("clicks_desc");
+    }
+  };
+  const clicksAriaSort = sort === "clicks_asc" ? "ascending" : sort === "clicks_desc" ? "descending" : "none";
+  const clicksSortIndicator = sort === "clicks_desc" ? "\u2193" : sort === "clicks_asc" ? "\u2191" : "\u2195";
+  const hasActiveFilters = search.trim().length > 0 || status !== "all" || sort !== "created_desc";
+  const handleResetFilters = () => {
+    onSearchChange("");
+    onStatusChange("all");
+    onSortChange("created_desc");
+  };
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { className: "card", "aria-labelledby": "links-heading", children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "section-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h2", { id: "links-heading", children: "Shortened Links" }),
@@ -24702,13 +24728,87 @@ var LinkTable = ({
         }
       )
     ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "filter-bar", role: "region", "aria-label": "Filter and sort links", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "search-box", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        "input",
+        {
+          id: "search-links-input",
+          type: "search",
+          placeholder: "Search by code or URL...",
+          "aria-label": "Search by code or URL",
+          value: search,
+          onChange: (e) => onSearchChange(e.target.value)
+        }
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "filter-controls", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "div",
+          {
+            className: "status-pills",
+            role: "group",
+            "aria-label": "Filter by link status",
+            children: STATUS_OPTIONS.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "button",
+              {
+                type: "button",
+                className: `status-pill ${status === opt.value ? "status-pill-active" : ""}`,
+                "aria-pressed": status === opt.value,
+                onClick: () => onStatusChange(opt.value),
+                children: opt.label
+              },
+              opt.value
+            ))
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "sort-control", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("label", { htmlFor: "sort-links-select", className: "sort-label", children: "Sort:" }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+            "select",
+            {
+              id: "sort-links-select",
+              value: sort,
+              onChange: (e) => onSortChange(e.target.value),
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "created_desc", children: "Newest first" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "created_asc", children: "Oldest first" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "clicks_desc", children: "Most clicks" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "clicks_asc", children: "Least clicks" })
+              ]
+            }
+          )
+        ] })
+      ] })
+    ] }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "table-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { "aria-describedby": "links-heading", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { scope: "col", children: "Original URL" }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { scope: "col", children: "Short Link" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { scope: "col", children: "Click Count" })
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { scope: "col", "aria-sort": clicksAriaSort, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "button",
+          {
+            type: "button",
+            className: `th-sort-btn ${clicksAriaSort !== "none" ? "th-sort-active" : ""}`,
+            onClick: handleToggleClicksSort,
+            title: "Toggle sort between most and least clicks",
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "Clicks" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "sort-arrow", "aria-hidden": "true", children: clicksSortIndicator })
+            ]
+          }
+        ) })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: isLoading && links.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 3, className: "empty-state", children: "Loading links..." }) }) : links.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 3, className: "empty-state", children: "No links shortened yet. Enter a URL above to create your first short link." }) }) : links.map((item) => {
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: isLoading && links.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 3, className: "empty-state", children: "Loading links..." }) }) : links.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { colSpan: 3, className: "empty-state", children: hasActiveFilters ? /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "empty-filter-state", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "No links match your current search or filters." }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "btn-secondary",
+            onClick: handleResetFilters,
+            children: "Reset Filters"
+          }
+        )
+      ] }) : "No links shortened yet. Enter a URL above to create your first short link." }) }) : links.map((item) => {
         const shortUrl = `${window.location.origin}/${item.code}`;
         const isExpired = item.max_clicks !== null && item.max_clicks !== void 0 && item.clicks >= item.max_clicks;
         return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { children: [
@@ -24748,7 +24848,7 @@ var LinkTable = ({
           ] }) }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "clicks-cell", children: [
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "clicks-badge", children: item.max_clicks !== null && item.max_clicks !== void 0 ? `${item.clicks} / ${item.max_clicks}` : item.clicks }),
-            isExpired && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "expired-badge", children: "Limit Reached" })
+            isExpired && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "expired-badge", children: "Expired" })
           ] }) })
         ] }, item.id ?? item.code);
       }) })
@@ -24762,11 +24862,20 @@ var App = () => {
   const [links, setLinks] = (0, import_react3.useState)([]);
   const [isLoading, setIsLoading] = (0, import_react3.useState)(true);
   const [loadError, setLoadError] = (0, import_react3.useState)(null);
+  const [sort, setSort] = (0, import_react3.useState)("created_desc");
+  const [status, setStatus] = (0, import_react3.useState)("all");
+  const [search, setSearch] = (0, import_react3.useState)("");
   const fetchLinks = (0, import_react3.useCallback)(async () => {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const response = await fetch("/api/links", {
+      const params = new URLSearchParams();
+      params.set("sort", sort);
+      params.set("status", status);
+      if (search.trim().length > 0) {
+        params.set("search", search.trim());
+      }
+      const response = await fetch(`/api/links?${params.toString()}`, {
         headers: { Accept: "application/json" }
       });
       if (!response.ok) {
@@ -24779,7 +24888,7 @@ var App = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [sort, status, search]);
   (0, import_react3.useEffect)(() => {
     void fetchLinks();
     const handleFocus = () => {
@@ -24788,8 +24897,7 @@ var App = () => {
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [fetchLinks]);
-  const handleLinkCreated = (newLink) => {
-    setLinks((prev) => [newLink, ...prev.filter((l) => l.code !== newLink.code)]);
+  const handleLinkCreated = (_newLink) => {
     void fetchLinks();
   };
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "container", children: [
@@ -24817,6 +24925,12 @@ var App = () => {
         {
           links,
           isLoading,
+          sort,
+          status,
+          search,
+          onSortChange: setSort,
+          onStatusChange: setStatus,
+          onSearchChange: setSearch,
           onRefresh: () => void fetchLinks()
         }
       )

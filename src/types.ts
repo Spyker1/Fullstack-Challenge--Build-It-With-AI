@@ -12,6 +12,20 @@ export interface LinkRecord {
   created_at: string;
 }
 
+export type LinkSortOption =
+  | "created_desc"
+  | "created_asc"
+  | "clicks_desc"
+  | "clicks_asc";
+
+export type LinkStatusFilter = "all" | "active" | "expired";
+
+export interface ListLinksFilter {
+  sort?: LinkSortOption;
+  status?: LinkStatusFilter;
+  search?: string;
+}
+
 export interface CreateLinkRequest {
   url?: unknown;
   customCode?: unknown;

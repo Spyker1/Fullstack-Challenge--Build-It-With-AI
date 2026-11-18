@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import type { LinkRecord } from "../types";
+import type {
+  LinkRecord,
+  LinkSortOption,
+  LinkStatusFilter,
+} from "../types";
 import { ErrorAlert } from "./components/ErrorAlert";
 import { LinkForm } from "./components/LinkForm";
 import { LinkTable } from "./components/LinkTable";
@@ -8,12 +12,22 @@ export const App: React.FC = () => {
   const [links, setLinks] = useState<LinkRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [sort, setSort] = useState<LinkSortOption>("created_desc");
+  const [status, setStatus] = useState<LinkStatusFilter>("all");
+  const [search, setSearch] = useState<string>("");
 
   const fetchLinks = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const response = await fetch("/api/links", {
+      const params = new URLSearchParams();
+      params.set("sort", sort);
+      params.set("status", status);
+      if (search.trim().length > 0) {
+        params.set("search", search.trim());
+      }
+
+      const response = await fetch(`/api/links?${params.toString()}`, {
         headers: { Accept: "application/json" },
       });
       if (!response.ok) {
@@ -26,7 +40,7 @@ export const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [sort, status, search]);
 
   useEffect(() => {
     void fetchLinks();
@@ -37,8 +51,7 @@ export const App: React.FC = () => {
     return () => window.removeEventListener("focus", handleFocus);
   }, [fetchLinks]);
 
-  const handleLinkCreated = (newLink: LinkRecord) => {
-    setLinks((prev) => [newLink, ...prev.filter((l) => l.code !== newLink.code)]);
+  const handleLinkCreated = (_newLink: LinkRecord) => {
     void fetchLinks();
   };
 
@@ -63,6 +76,12 @@ export const App: React.FC = () => {
         <LinkTable
           links={links}
           isLoading={isLoading}
+          sort={sort}
+          status={status}
+          search={search}
+          onSortChange={setSort}
+          onStatusChange={setStatus}
+          onSearchChange={setSearch}
           onRefresh={() => void fetchLinks()}
         />
       </main>

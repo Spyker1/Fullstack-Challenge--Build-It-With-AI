@@ -1,4 +1,11 @@
-import type { LinkRecord } from "./types";
+import type { LinkRecord, LinkSortOption, ListLinksFilter } from "./types";
+
+const ORDER_BY_ALLOWLIST: Record<LinkSortOption, string> = {
+  created_desc: "created_at DESC, id DESC",
+  created_asc: "created_at ASC, id ASC",
+  clicks_desc: "clicks DESC, created_at DESC, id DESC",
+  clicks_asc: "clicks ASC, created_at DESC, id DESC",
+};
 
 /**
  * Inserts a new shortened link into D1 and returns the created record.
@@ -20,16 +27,48 @@ export async function createLink(
 }
 
 /**
- * Lists all shortened links ordered by created_at DESC.
+ * Lists shortened links with optional status filtering, search query, and allowlisted ORDER BY sorting.
  */
-export async function listLinks(db: D1Database): Promise<LinkRecord[]> {
-  const { results } = await db
-    .prepare(
-      `SELECT id, code, original_url, clicks, max_clicks, created_at
-       FROM links
-       ORDER BY created_at DESC, id DESC`
-    )
-    .all<LinkRecord>();
+export async function listLinks(
+  db: D1Database,
+  filter: ListLinksFilter = {}
+): Promise<LinkRecord[]> {
+  const whereClauses: string[] = [];
+  const bindParams: unknown[] = [];
+
+  if (filter.status === "active") {
+    whereClauses.push("(max_clicks IS NULL OR clicks < max_clicks)");
+  } else if (filter.status === "expired") {
+    whereClauses.push("(max_clicks IS NOT NULL AND clicks >= max_clicks)");
+  }
+
+  const trimmedSearch = filter.search?.trim();
+  if (trimmedSearch) {
+    whereClauses.push("(code LIKE ? OR original_url LIKE ?)");
+    const likePattern = `%${trimmedSearch}%`;
+    bindParams.push(likePattern, likePattern);
+  }
+
+  const whereSql =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+  const sortKey: LinkSortOption =
+    filter.sort && filter.sort in ORDER_BY_ALLOWLIST
+      ? filter.sort
+      : "created_desc";
+  const orderBySql = ORDER_BY_ALLOWLIST[sortKey];
+
+  const query = `
+    SELECT id, code, original_url, clicks, max_clicks, created_at
+    FROM links
+    ${whereSql}
+    ORDER BY ${orderBySql}
+  `;
+
+  const statement = db.prepare(query);
+  const boundStatement =
+    bindParams.length > 0 ? statement.bind(...bindParams) : statement;
+  const { results } = await boundStatement.all<LinkRecord>();
 
   return results ?? [];
 }

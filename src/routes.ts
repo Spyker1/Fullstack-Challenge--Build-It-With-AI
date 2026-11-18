@@ -1,5 +1,10 @@
 import { createLink, getLinkByCode, incrementLinkClicks, listLinks } from "./db";
-import type { CreateLinkRequest, Env } from "./types";
+import type {
+  CreateLinkRequest,
+  Env,
+  LinkSortOption,
+  LinkStatusFilter,
+} from "./types";
 import {
   generateShortCode,
   validateCustomCode,
@@ -8,6 +13,19 @@ import {
 } from "./validation";
 
 const MAX_COLLISION_RETRIES = 5;
+
+const VALID_SORT_OPTIONS = new Set<LinkSortOption>([
+  "created_desc",
+  "created_asc",
+  "clicks_desc",
+  "clicks_asc",
+]);
+
+const VALID_STATUS_FILTERS = new Set<LinkStatusFilter>([
+  "all",
+  "active",
+  "expired",
+]);
 
 export function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -130,10 +148,28 @@ export async function handleCreateLink(request: Request, env: Env): Promise<Resp
 
 /**
  * GET /api/links
- * Returns all shortened links ordered by created_at DESC.
+ * Supports optional query parameters:
+ * - `sort`: `clicks_desc` | `clicks_asc` | `created_desc` (default) | `created_asc`
+ * - `status`: `all` (default) | `active` | `expired`
+ * - `search`: optional substring filter on `code` or `original_url`
  */
-export async function handleListLinks(env: Env): Promise<Response> {
-  const links = await listLinks(env.DB);
+export async function handleListLinks(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const rawSort = url.searchParams.get("sort") as LinkSortOption | null;
+  const rawStatus = url.searchParams.get("status") as LinkStatusFilter | null;
+  const rawSearch = url.searchParams.get("search") ?? undefined;
+
+  const sort: LinkSortOption =
+    rawSort && VALID_SORT_OPTIONS.has(rawSort) ? rawSort : "created_desc";
+  const status: LinkStatusFilter =
+    rawStatus && VALID_STATUS_FILTERS.has(rawStatus) ? rawStatus : "all";
+
+  const links = await listLinks(env.DB, {
+    sort,
+    status,
+    search: rawSearch,
+  });
+
   return jsonResponse(links, 200);
 }
 

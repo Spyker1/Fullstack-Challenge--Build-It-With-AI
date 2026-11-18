@@ -25,7 +25,7 @@ export default {
     // 1. API endpoints (/api/*)
     if (pathname === "/api/links") {
       if (method === "GET") {
-        return handleListLinks(env);
+        return handleListLinks(request, env);
       }
       if (method === "POST") {
         return handleCreateLink(request, env);
