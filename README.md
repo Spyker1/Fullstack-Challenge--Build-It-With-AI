@@ -19,16 +19,16 @@
 Below are the screenshots from the Antigravity IDE session showing the prompts, execution durations (`Worked for Xm`), timestamps, and local `wrangler dev` verification:
 
 ### 1. Initial Scaffolding & Core MVP (`evidence/prompt-1.png`)
-[./evidence/prompt-1.png]
+<img src="./evidence/prompt-1.png" alt="Prompt 1 - Initial Scaffolding" width="100%" />
 
 ### 2. Core URL Shortener & D1 Persistence (`evidence/prompt-2.png`)
-[./evidence/prompt-2.png]
+<img src="./evidence/prompt-2.png" alt="Prompt 2 - Core Endpoints" width="100%" />
 
 ### 3. Modular Backend Refactor, React UI & Filtering (`evidence/prompt-3.png`)
-[./evidence/prompt-3.png]
+<img src="./evidence/prompt-3.png" alt="Prompt 3 - Modular Refactor and React UI" width="100%" />
 
 ### 4. Link Filtering, Search & Click-Count Sorting (`evidence/prompt-4.png`)
-[./evidence/prompt-4.png]
+<img src="./evidence/prompt-4.png" alt="Prompt 4 - Link Filtering and Sorting" width="100%" />
 
 ## Overview
 
