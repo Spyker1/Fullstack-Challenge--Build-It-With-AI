@@ -14,6 +14,22 @@
 | **Prompt 4** | `12:28 PM` | ~5 min | Link filtering, search, and click-count/date sorting across D1 and React UI |
 | **Prompt 5** | `12:40 PM` | ~1 min | Documentation (`README.md` and `AI_NOTES.md`) |
 
+## Session Evidence & Screenshots
+
+Below are the screenshots from the Antigravity IDE session showing the prompts, execution durations (`Worked for Xm`), timestamps, and local `wrangler dev` verification:
+
+### 1. Initial Scaffolding & Core MVP (`evidence/prompt-1.png`)
+[./evidence/prompt-1.png]
+
+### 2. Core URL Shortener & D1 Persistence (`evidence/prompt-2.png`)
+[./evidence/prompt-2.png]
+
+### 3. Modular Backend Refactor, React UI & Filtering (`evidence/prompt-3.png`)
+[./evidence/prompt-3.png]
+
+### 4. Link Filtering, Search & Click-Count Sorting (`evidence/prompt-4.png`)
+[./evidence/prompt-4.png]
+
 ## Overview
 
 A full-stack URL shortener built on **Cloudflare Workers** (TypeScript) with **Cloudflare D1 (SQLite)** for persistent local storage and a **React + TypeScript** single-page dashboard served via Cloudflare Workers static assets.
