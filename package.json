@@ -3,13 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build:client": "esbuild src/client/main.tsx --bundle --outfile=public/app.js --format=esm --platform=browser --target=es2020 --jsx=automatic",
+    "build": "npm run build:client",
+    "dev": "npm run build:client && wrangler dev",
+    "deploy": "npm run build:client && wrangler deploy",
     "db:migrate": "wrangler d1 execute url-shortener-db --local --file=./schema.sql",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "esbuild": "^0.24.0",
     "typescript": "^5.6.3",
     "wrangler": "^3.91.0"
   }
